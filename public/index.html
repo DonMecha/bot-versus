@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bot Versus</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="stage">
+  <div id="top" class="panel">
+    <div class="badge" id="gtitle">VS</div>
+    <div id="remain"></div>
+    <div id="topmid">
+      <div class="tp"><span class="mini" id="tav-human"></span><span class="nm">あなた</span><span class="sd" id="tsd-human"></span></div>
+      <div class="cnt" id="tc-human">0</div>
+      <div class="sep"></div>
+      <div class="cnt" id="tc-bot">0</div>
+      <div class="tp"><span class="sd" id="tsd-bot"></span><span class="nm" id="tname-bot">Bot</span><span class="mini" id="tav-bot"></span></div>
+    </div>
+    <div id="botpill" class="off">Bot 未接続</div>
+  </div>
+
+  <div id="game" class="panel">
+    <div class="pcard" id="pc-human">
+      <div class="av" id="av-human"></div>
+      <div class="pname">あなた</div>
+      <div class="pside" id="ps-human"></div>
+      <div class="pnum" id="pn-human">0</div>
+      <div class="think">あなたの番</div>
+    </div>
+    <div id="boardwrap"><div id="board"></div></div>
+    <div class="pcard" id="pc-bot">
+      <div class="av" id="av-bot" title="クリックしてアイコン画像を選ぶ" role="button" tabindex="0"></div><input type="file" id="avfile" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+      <div class="pname" id="name-bot">Bot</div>
+      <div class="pside" id="ps-bot"></div>
+      <div class="pnum" id="pn-bot">0</div>
+      <div class="think">考え中…</div>
+      <div class="pdesc" id="desc-bot"></div>
+    </div>
+    <div id="waitpill"></div>
+    <div id="endov">
+      <div id="endbox">
+        <div id="endtitle">GAME SET</div>
+        <div id="endwin"></div>
+        <div id="endscore"></div>
+        <button class="primary" id="rematch" type="button">もう一局</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="chat" class="panel">
+    <div id="chathead">トーク</div>
+    <div id="msgs"><div class="spacer"></div></div>
+    <form id="inbox"><input id="inp" maxlength="500" autocomplete="off" placeholder="話しかける…"><button id="send" type="submit" aria-label="送信">➤</button></form>
+  </div>
+
+  <div id="bottom" class="panel">
+    <div class="t">Bot Versus</div>
+    <select id="order" aria-label="手番"><option value="first">あなたが先手</option><option value="second">Botが先手</option><option value="random">ランダム</option></select>
+    <select id="size" aria-label="盤の大きさ"></select>
+    <button class="ghost" id="newgame" type="button">新しい対局</button>
+    <div class="h" id="hint"></div>
+  </div>
+</div>
+<script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "bot-versus",
+  "version": "0.1.0",
+  "description": "Play a board game against your own chat bot and talk with it while you play.",
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test"
+  }
+}
