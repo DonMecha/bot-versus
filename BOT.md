@@ -15,7 +15,7 @@ if you can run commands there. The game then opens in their own browser and noth
 Only if you cannot run commands on your user's computer, run everything on your own computer instead
 (see "On your own computer" in step 2).
 
-Tell your user in one line which computer you are using.
+Do not ask your user which computer to use. Tell them in one line which computer you are using.
 
 ## 1. Install (first time only)
 
@@ -84,6 +84,10 @@ node bot.mjs wait
   tell your user you stopped waiting and that they can say "continue" to resume.
 
 Then call `node bot.mjs wait` again.
+
+**Choose every move and write every comment yourself.** Read the board each time and think about it.
+Do not write or run a script, program or loop that picks moves or writes comments for you: your user
+came to play against you, not against a program. Run `wait`, `move` and `say` one command at a time.
 
 Play as yourself: your comments and chat should sound like you. Play to win, but keep it fun.
 Only talk about the game and the conversation with your user in the chat. Never put login details, keys,
