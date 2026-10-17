@@ -2,12 +2,24 @@
 
 Read this when your user asks you to install, set up or start this repository
 (for example "install this", "これを入れて", "対戦したい").
-You will run a small game server on your computer, open the game in your browser,
+You will run a small game server, open the game in your user's browser,
 and then play against your user while chatting with them.
 
-Talk to your user in their language. Keep everything below inside your own computer.
+Talk to your user in their language.
+
+## 0. Where to run it
+
+**Run everything on your user's own computer** (the computer they are talking to you from),
+if you can run commands there. The game then opens in their own browser and nothing else is needed.
+
+Only if you cannot run commands on your user's computer, run everything on your own computer instead
+(see "On your own computer" in step 2).
+
+Tell your user in one line which computer you are using.
 
 ## 1. Install (first time only)
+
+In the home folder of the computer you chose:
 
 ```bash
 git clone https://github.com/DonMecha/bot-versus.git bot-versus
@@ -17,42 +29,43 @@ node --version   # needs Node.js 18 or newer
 
 If `git` is not available, download and unpack
 `https://github.com/DonMecha/bot-versus/archive/refs/heads/main.zip` instead.
-If Node.js is missing, install Node.js 18+ first.
-To get a newer version later: `git pull` in the `bot-versus` folder.
+If Node.js 18+ is missing on your user's computer, ask your user before installing it.
+If it is already installed, get the newest version with `git pull` in the `bot-versus` folder.
 
-Run every command below inside the `bot-versus` folder.
+Run every command below inside the `bot-versus` folder, on the same computer.
 
-## 2. Start the game and give your user the link
+## 2. Start the game
 
 Use your own bot name and a one-line description of yourself (your role and personality).
 
 ```bash
-node start.mjs --name "<your bot name>" --desc "<one line about you>" --share
+node start.mjs --name "<your bot name>" --desc "<one line about you>" --open
 ```
 
-It starts the game server (or reuses the running one) and prints JSON:
-
-- `share`: a link your user can open on their own phone or computer. **Send this link to your user.**
-  It contains a secret key; anyone with the link can play and chat, so give it only to your user.
-- `local`: the same game inside your computer. Open it in your browser too, so your user can also
-  play from your computer screen if the link does not work for them.
-
-If `--share` fails, it prints `error` and no link (it only gives out a link that really opens).
-Then run `node start.mjs` without `--share` and tell your user to open your computer from this
-conversation and take control of the browser to play.
+It starts the game server (or reuses the running one), opens the game in that computer's browser,
+and prints JSON with `local` (the game's address). If `opened` is `false`, send your user the
+`local` address and ask them to open it in their browser on that computer.
 
 If you can get your profile picture as a file, add `--avatar <file>` (png, jpg, webp or gif, up to 2 MB).
 If you cannot, tell your user they can tap or click the icon on your card in the game to choose one.
 
 The user moves by tapping or clicking the highlighted squares and can type to you in the chat box.
 
-**Do not end your turn here.** Send your user the link, then go straight to step 3 in the same turn.
+**To play from a phone**: add `--share`. It prints `share`, a link that opens on any phone or computer.
+Send that link to your user. It contains a secret key; anyone with the link can play and chat, so give it
+only to your user. If `--share` fails, it prints `error` and no link; play on the computer instead.
+
+**On your own computer** (only if you cannot run commands on your user's computer): run the same
+commands on your computer with `--open`, then tell your user to open your computer from this conversation
+and take control of the browser to play.
+
+**Do not end your turn here.** Go straight to step 3 in the same turn.
 If your turn ends, nobody is waiting for the user's moves and the game page shows "Botが待機していません" (the bot is not waiting).
 
 ## 3. Play loop
 
-Repeat until the user asks you to stop. Keep looping inside one turn: talk to the user with `say`,
-not by ending your turn with a reply.
+Repeat until the user asks you to stop. Run these commands on the same computer as the game.
+Keep looping inside one turn: talk to the user with `say`, not by ending your turn with a reply.
 
 ```bash
 node bot.mjs wait
@@ -74,7 +87,7 @@ Then call `node bot.mjs wait` again.
 
 Play as yourself: your comments and chat should sound like you. Play to win, but keep it fun.
 Only talk about the game and the conversation with your user in the chat. Never put login details, keys,
-file locations or private data there.
+file locations or private data there. On your user's computer, only run the commands in this file.
 
 If the user tells you in your conversation to continue (for example "continue", "対戦を続けて"), go back to `wait`.
 
@@ -82,7 +95,7 @@ If the user tells you in your conversation to continue (for example "continue", 
 
 | Command | What it does |
 | --- | --- |
-| `node start.mjs --name ... --desc ... [--avatar file] [--share]` | start the game, set your profile, make a share link |
+| `node start.mjs --name ... --desc ... [--avatar file] [--open] [--share]` | start the game, set your profile, open it in the browser, make a phone link |
 | `node start.mjs --stop` | close the share link and stop the server |
 | `node bot.mjs wait [--timeout 600]` | wait for your turn, a chat message, or a game start/end |
 | `node bot.mjs move <move> ["comment"]` | play a move |

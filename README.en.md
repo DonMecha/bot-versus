@@ -13,9 +13,12 @@ Just ask your Grok Bot:
 
 > Install this: https://github.com/DonMecha/bot-versus
 
-The bot sets the game up on its computer and sends you a link.
-Open the link in the browser on your phone or computer and play.
-If the link does not open, you can also open the bot's computer from the conversation and take control to play.
+The bot sets the game up on your computer and opens it in your browser. Just play.
+To play on your phone, ask for a phone link too ("give me a link for my phone").
+If the bot is not allowed to run commands on your computer, it sets the game up on its own computer instead:
+open the bot's computer from the conversation and take control to play.
+
+Your computer needs Node.js 18 or newer. If it is missing, the bot asks before installing it.
 
 - Tap or click a highlighted square to place a disc.
 - Type in the chat and the bot answers. It also comments on each of its moves.
@@ -26,16 +29,17 @@ The bot's instructions are in [BOT.md](BOT.md).
 
 ## Troubleshooting
 
+- **The browser does not open**: open the address the bot sent (`http://127.0.0.1:…`) in a browser on that computer.
 - **The page says "Botが待機していません" (the bot is not waiting)**: tell the bot "continue" in your conversation. It goes back to waiting.
 - **The page says "リンクの合言葉が違います" (wrong key in the link)**: open the link exactly as the bot sent it, including `?key=`. Restarting the bot makes a new link.
-- **The bot's computer screen says it cannot connect**: in Grok Bot settings → Computer, run "Update the bot's computer", restart the app, then start the computer again. The update removes apps and packages installed on the bot's computer (files and sign-ins stay). Afterwards ask the bot to start the server again.
+- **(Playing on the bot's computer) the screen says it cannot connect**: in Grok Bot settings → Computer, run "Update the bot's computer", restart the app, then start the computer again. The update removes apps and packages installed on the bot's computer (files and sign-ins stay). Afterwards ask the bot to start the server again.
 
 ## Run it on your own machine
 
 Requires Node.js 18 or newer. No dependencies.
 
 ```bash
-node start.mjs --name "Bot" --share   # start the server and make a share link; without --share it stays on this machine
+node start.mjs --name "Bot" --open    # start the server and open it in the browser; --share also makes a phone link
 node bot.mjs wait                     # the bot side (see BOT.md)
 node start.mjs --stop                 # close the link and stop the server
 ```

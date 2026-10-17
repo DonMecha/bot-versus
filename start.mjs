@@ -2,8 +2,10 @@
 // One command for the bot: start the game server (if needed), set the bot's profile,
 // and optionally open a share link the user can open on their own phone or computer.
 //
-//   node start.mjs [--name "<bot name>"] [--desc "<one line>"] [--avatar <file>] [--share]
+//   node start.mjs [--name "<bot name>"] [--desc "<one line>"] [--avatar <file>] [--open] [--share]
 //   node start.mjs --stop          stop the share link and the server
+//
+// --open opens the game in this computer's default browser.
 //
 // --share runs a Cloudflare quick tunnel (no account needed). cloudflared is used from PATH,
 // or downloaded once into .data/bin/. The link contains a random key; only people with the
@@ -22,7 +24,7 @@ function parse(argv) {
   for (let i = 0; i < argv.length; i++) {
     const m = /^--([a-z-]+)(?:=(.*))?$/.exec(argv[i]);
     if (!m) continue;
-    if (['share', 'stop'].includes(m[1])) opt[m[1]] = true;
+    if (['share', 'stop', 'open'].includes(m[1])) opt[m[1]] = true;
     else opt[m[1]] = m[2] ?? argv[++i];
   }
   return opt;
@@ -110,6 +112,16 @@ async function ensureShare(localUrl) {
   throw new Error('the share link did not come up. See .data/tunnel.log');
 }
 
+function openBrowser(url) {
+  const [cmd, args] = process.platform === 'win32' ? ['cmd', ['/c', 'start', '""', url]]
+    : process.platform === 'darwin' ? ['open', [url]] : ['xdg-open', [url]];
+  return new Promise(resolve => {
+    const child = spawn(cmd, args, { detached: true, stdio: 'ignore' });
+    child.on('error', () => resolve(false));
+    child.on('spawn', () => { child.unref(); resolve(true); });
+  });
+}
+
 async function stop() {
   const share = readJson(path.join(DATA, 'share.json'));
   if (share?.pid && alive(share.pid)) process.kill(share.pid);
@@ -132,6 +144,7 @@ async function main() {
     if (!r.ok) throw new Error('avatar: ' + ((await r.json().catch(() => ({}))).error || r.status));
   }
   const out = { local: local + '/' };
+  if (opt.open) out.opened = await openBrowser(out.local);
   if (opt.share) {
     const key = fs.readFileSync(path.join(DATA, 'key'), 'utf8').trim();
     out.share = (await ensureShare(local)) + '/?key=' + key;
