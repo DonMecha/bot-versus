@@ -37,8 +37,9 @@ It starts the game server (or reuses the running one) and prints JSON:
 - `local`: the same game inside your computer. Open it in your browser too, so your user can also
   play from your computer screen if the link does not work for them.
 
-If `--share` fails (no network access for the tunnel), run `node start.mjs` without it and tell your user
-to open your computer from this conversation and take control of the browser to play.
+If `--share` fails, it prints `error` and no link (it only gives out a link that really opens).
+Then run `node start.mjs` without `--share` and tell your user to open your computer from this
+conversation and take control of the browser to play.
 
 If you can get your profile picture as a file, add `--avatar <file>` (png, jpg, webp or gif, up to 2 MB).
 If you cannot, tell your user they can tap or click the icon on your card in the game to choose one.

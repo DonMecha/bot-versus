@@ -89,19 +89,21 @@ async function ensureShare(localUrl) {
   const logFile = path.join(DATA, 'tunnel.log');
   fs.writeFileSync(logFile, '');
   const log = fs.openSync(logFile, 'a');
-  const child = spawn(exe, ['tunnel', '--no-autoupdate', '--url', localUrl], { detached: true, stdio: ['ignore', log, log] });
+  // HTTP/2 over TCP: many hosted computers block the UDP that cloudflared's default (QUIC) needs.
+  const child = spawn(exe, ['tunnel', '--no-autoupdate', '--protocol', 'http2', '--url', localUrl], { detached: true, stdio: ['ignore', log, log] });
   child.unref();
   for (let i = 0; i < 120; i++) {
     await sleep(500);
     const m = /https:\/\/[a-z0-9-]+\.trycloudflare\.com/.exec(fs.readFileSync(logFile, 'utf8'));
     if (m) {
-      // The address is printed before the edge is ready; wait until the page answers.
-      for (let k = 0; k < 40; k++) {
-        try { const r = await fetch(m[0] + '/', { signal: AbortSignal.timeout(4000) }); if (r.ok) break; } catch { /* not yet */ }
+      // The address is printed before the edge is connected; hand it out only once the page answers.
+      for (let k = 0; k < 45; k++) {
+        try { const r = await fetch(m[0] + '/', { signal: AbortSignal.timeout(4000) }); if (r.ok) { fs.writeFileSync(f, JSON.stringify({ url: m[0], pid: child.pid, local: localUrl })); return m[0]; } } catch { /* not yet */ }
         await sleep(1000);
       }
-      fs.writeFileSync(f, JSON.stringify({ url: m[0], pid: child.pid, local: localUrl }));
-      return m[0];
+      try { process.kill(child.pid); } catch { /* already gone */ }
+      const tail = fs.readFileSync(logFile, 'utf8').trim().split('\n').slice(-3).join(' | ');
+      throw new Error(`the share link was created but does not open from the internet (this computer may block the tunnel). Last log: ${tail}`);
     }
     if (!alive(child.pid)) break;
   }
