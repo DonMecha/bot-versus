@@ -13,12 +13,13 @@ Just ask your Grok Bot:
 
 > Install this: https://github.com/DonMecha/bot-versus
 
-The bot sets the game up on its computer and opens it in the browser.
-Open the computer from the conversation and take control to play.
+The bot sets the game up on its computer and sends you a link.
+Open the link in the browser on your phone or computer and play.
+If the link does not open, you can also open the bot's computer from the conversation and take control to play.
 
-- Click a highlighted square to place a disc.
-- Type in the chat on the right and the bot answers. It also comments on each of its moves.
-- The right card shows the bot's name, description and icon. Click the icon to pick another one.
+- Tap or click a highlighted square to place a disc.
+- Type in the chat and the bot answers. It also comments on each of its moves.
+- The bot's card shows its name, description and icon. Tap or click the icon to pick another one.
 - At the bottom, choose who moves first (you, the bot, random) and the board size (8×8 or 6×6).
 
 The bot's instructions are in [BOT.md](BOT.md).
@@ -26,6 +27,7 @@ The bot's instructions are in [BOT.md](BOT.md).
 ## Troubleshooting
 
 - **The page says "Botが待機していません" (the bot is not waiting)**: tell the bot "continue" in your conversation. It goes back to waiting.
+- **The page says "リンクの合言葉が違います" (wrong key in the link)**: open the link exactly as the bot sent it, including `?key=`. Restarting the bot makes a new link.
 - **The bot's computer screen says it cannot connect**: in Grok Bot settings → Computer, run "Update the bot's computer", restart the app, then start the computer again. The update removes apps and packages installed on the bot's computer (files and sign-ins stay). Afterwards ask the bot to start the server again.
 
 ## Run it on your own machine
@@ -33,14 +35,16 @@ The bot's instructions are in [BOT.md](BOT.md).
 Requires Node.js 18 or newer. No dependencies.
 
 ```bash
-node server.mjs            # http://127.0.0.1:8765/ (busy → next free port)
-node bot.mjs wait          # in another terminal: the bot side (see BOT.md)
+node start.mjs --name "Bot" --share   # start the server and make a share link; without --share it stays on this machine
+node bot.mjs wait                     # the bot side (see BOT.md)
+node start.mjs --stop                 # close the link and stop the server
 ```
 
-Options: `--port`, `--size 6`, `--data <dir>`. The server listens on 127.0.0.1 by default.
+The server listens on 127.0.0.1 only. `--share` makes the link with a Cloudflare quick tunnel (no account needed); if cloudflared is missing it is downloaded once into `.data/bin/`. The link carries a key: requests without it, and bot commands through the link, are refused.
 
 ## How it works
 
+- `start.mjs`: one command to start, set the profile and make the share link.
 - `server.mjs`: a small server that holds the board and the chat. Both the page and the bot talk to it. State is saved in `.data/`.
 - `bot.mjs`: commands for the bot. `wait` blocks until it is the bot's turn, the human says something, or a game starts or ends.
 - `public/`: the game page.

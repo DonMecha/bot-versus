@@ -7,44 +7,48 @@ and then play against your user while chatting with them.
 
 Talk to your user in their language. Keep everything below inside your own computer.
 
-## 1. Install and start (first time)
-
-Run every command in this file inside the `bot-versus` folder.
+## 1. Install (first time only)
 
 ```bash
 git clone https://github.com/DonMecha/bot-versus.git bot-versus
 cd bot-versus
 node --version   # needs Node.js 18 or newer
-nohup node server.mjs > server.log 2>&1 &
-sleep 1 && node bot.mjs state
 ```
 
 If `git` is not available, download and unpack
 `https://github.com/DonMecha/bot-versus/archive/refs/heads/main.zip` instead.
 If Node.js is missing, install Node.js 18+ first.
-If the server is already running (`node bot.mjs state` answers), do not start a second one.
+To get a newer version later: `git pull` in the `bot-versus` folder.
 
-## 2. Tell the game who you are
+Run every command below inside the `bot-versus` folder.
+
+## 2. Start the game and give your user the link
 
 Use your own bot name and a one-line description of yourself (your role and personality).
 
 ```bash
-node bot.mjs profile --name "<your bot name>" --desc "<one line about you>"
+node start.mjs --name "<your bot name>" --desc "<one line about you>" --share
 ```
 
+It starts the game server (or reuses the running one) and prints JSON:
+
+- `share`: a link your user can open on their own phone or computer. **Send this link to your user.**
+  It contains a secret key; anyone with the link can play and chat, so give it only to your user.
+- `local`: the same game inside your computer. Open it in your browser too, so your user can also
+  play from your computer screen if the link does not work for them.
+
+If `--share` fails (no network access for the tunnel), run `node start.mjs` without it and tell your user
+to open your computer from this conversation and take control of the browser to play.
+
 If you can get your profile picture as a file, add `--avatar <file>` (png, jpg, webp or gif, up to 2 MB).
-If you cannot, tell your user they can click the icon on the right card in the game to choose one.
+If you cannot, tell your user they can tap or click the icon on your card in the game to choose one.
 
-## 3. Open the game for your user
+The user moves by tapping or clicking the highlighted squares and can type to you in the chat box.
 
-Open the `url` shown by `node bot.mjs state` (usually `http://127.0.0.1:8765/`; another port if that one is busy) in your computer's browser.
-Tell your user: open your computer from this conversation and take control of the browser to play.
-The user moves by clicking the highlighted squares and can type to you in the chat box on the right.
-
-**Do not end your turn here.** Tell your user the game is ready, then go straight to step 4 in the same turn.
+**Do not end your turn here.** Send your user the link, then go straight to step 3 in the same turn.
 If your turn ends, nobody is waiting for the user's moves and the game page shows "Botが待機していません" (the bot is not waiting).
 
-## 4. Play loop
+## 3. Play loop
 
 Repeat until the user asks you to stop. Keep looping inside one turn: talk to the user with `say`,
 not by ending your turn with a reply.
@@ -77,6 +81,8 @@ If the user tells you in your conversation to continue (for example "continue", 
 
 | Command | What it does |
 | --- | --- |
+| `node start.mjs --name ... --desc ... [--avatar file] [--share]` | start the game, set your profile, make a share link |
+| `node start.mjs --stop` | close the share link and stop the server |
 | `node bot.mjs wait [--timeout 600]` | wait for your turn, a chat message, or a game start/end |
 | `node bot.mjs move <move> ["comment"]` | play a move |
 | `node bot.mjs say "<text>"` | chat with your user |
@@ -86,5 +92,5 @@ If the user tells you in your conversation to continue (for example "continue", 
 
 ## Stopping
 
-When the user is done, stop the server: `pkill -f "node server.mjs"`.
-The board and chat are saved in `.data/` and come back when you start the server again.
+When the user is done, run `node start.mjs --stop`. It closes the share link and stops the server.
+The board and chat are saved in `.data/` and come back when you start again (the link will be new).

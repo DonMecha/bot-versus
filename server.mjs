@@ -7,6 +7,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { getGame, games } from './games/index.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -43,6 +44,9 @@ export function createApp({ dataDir, gameId = 'othello', size } = {}) {
     s = { seq: 0, profile: { name: 'Bot', description: '' }, chat: [], match: null, bot: { chatSeen: 0, eventSeen: 0, lastSeenAt: 0 }, events: [] };
     s.match = newMatch(gameId, size ? { size: Number(size) } : {}, 'first');
   }
+  // Access key for the share link. Requests that arrive through a tunnel must carry it.
+  if (!s.key) s.key = randomBytes(18).toString('base64url');
+  fs.writeFileSync(path.join(dataDir, 'key'), s.key, { mode: 0o600 });
   const waiters = new Set();
 
   function newMatch(game, opts, humanOrder) {
@@ -59,7 +63,7 @@ export function createApp({ dataDir, gameId = 'othello', size } = {}) {
 
   function save() {
     const tmp = file + '.tmp';
-    fs.writeFileSync(tmp, JSON.stringify(s));
+    fs.writeFileSync(tmp, JSON.stringify(s), { mode: 0o600 });
     fs.renameSync(tmp, file);
   }
 
@@ -135,6 +139,13 @@ export function createApp({ dataDir, gameId = 'othello', size } = {}) {
     };
   }
 
+  // A tunnel (cloudflared and the like) adds forwarding headers; direct local requests have none.
+  const forwarded = req => Boolean(req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.headers['forwarded']);
+  function keyOk(given) {
+    const a = Buffer.from(String(given || '')), b = Buffer.from(s.key);
+    return a.length === b.length && timingSafeEqual(a, b);
+  }
+
   function json(res, code, body) {
     res.writeHead(code, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
     res.end(JSON.stringify(body));
@@ -149,11 +160,17 @@ export function createApp({ dataDir, gameId = 'othello', size } = {}) {
   async function handle(req, res) {
     const url = new URL(req.url, 'http://local');
     const p = url.pathname;
-    // Refuse cross-site writes from other pages open in the same browser.
-    const origin = req.headers.origin;
-    if (req.method !== 'GET' && origin) {
-      let host = null; try { host = new URL(origin).host; } catch { /* "null" or malformed */ }
-      if (host !== req.headers.host) return json(res, 403, { error: 'cross-origin request refused' });
+    if (forwarded(req)) {
+      // Through the share link: only the human side, and only with the key.
+      if (p.startsWith('/api/bot/')) return json(res, 403, { error: 'bot commands are local only' });
+      if (!keyOk(req.headers['x-bv-key'] || url.searchParams.get('key'))) return json(res, 401, { error: 'missing or wrong key in the link' });
+    } else {
+      // Refuse cross-site writes from other pages open in the same browser.
+      const origin = req.headers.origin;
+      if (req.method !== 'GET' && origin) {
+        let host = null; try { host = new URL(origin).host; } catch { /* "null" or malformed */ }
+        if (host !== req.headers.host) return json(res, 403, { error: 'cross-origin request refused' });
+      }
     }
 
     if (req.method === 'GET' && p === '/api/state') {
@@ -175,7 +192,7 @@ export function createApp({ dataDir, gameId = 'othello', size } = {}) {
       return json(res, 200, view);
     }
 
-    if (req.method === 'PUT' && p === '/api/bot/avatar') {
+    if (req.method === 'PUT' && (p === '/api/bot/avatar' || p === '/api/avatar')) {
       const buf = await readBody(req, MAX_AVATAR);
       const type = imageType(buf);
       if (!type) return json(res, 400, { error: 'avatar must be png, jpeg, webp or gif' });

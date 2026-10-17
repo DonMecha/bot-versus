@@ -30,7 +30,7 @@ button,input,select{font-family:inherit}
 .cell.hint::after{content:"";position:absolute;width:14px;height:14px;border-radius:50%;background:#ffffff30}
 .cell.hint:hover::after{background:#ffffff70}
 .cell.last{background:#2a8045}
-.disc{width:var(--disc,50px);height:var(--disc,50px);position:relative}
+.disc{width:84%;height:84%;position:relative}
 .disc svg{width:100%;height:100%;display:block;filter:drop-shadow(0 2px 2px #0008)}
 .disc.flip{animation:flip .42s ease-in-out}
 .disc.place{animation:place .3s ease-out}
@@ -82,3 +82,33 @@ button,input,select{font-family:inherit}
 #bottom .h{margin-left:auto;font-size:14px;color:#ffd54a;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #bottom select,#bottom .ghost{background:#2a2a30;color:#ddd;border:1px solid #555;border-radius:16px;font-size:13px;padding:5px 12px}
 #bottom .ghost{cursor:pointer}
+
+/* Phones and narrow windows: stack everything at full width instead of shrinking the wide layout. */
+html:has(body.portrait),body.portrait{overflow-x:hidden;overflow-y:auto;height:auto}
+.portrait .cell{min-width:0;min-height:0}
+.portrait #stage{position:static;transform:none!important;width:100%;height:auto;display:flex;flex-direction:column;gap:8px;padding:8px}
+.portrait #stage>.panel{position:relative;left:auto;top:auto;width:auto;height:auto}
+.portrait #stage>#top{flex-wrap:wrap;gap:8px;padding:8px 10px;height:auto}
+.portrait #topmid{order:3;flex-basis:100%;gap:8px}
+.portrait .tp{font-size:15px;max-width:34vw;min-width:0}
+.portrait .tp .mini{display:none}
+.portrait .cnt{width:46px;height:34px;font-size:20px}
+.portrait #remain{min-width:0;font-size:14px}
+.portrait #stage>#game{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;padding:8px;overflow:visible}
+.portrait #boardwrap{position:relative;left:auto;top:auto;order:3;flex-basis:100%;width:100%;height:auto;aspect-ratio:1;padding:3%}
+.portrait #board{width:100%;height:100%}
+.portrait .pcard{position:relative;top:auto;left:auto!important;right:auto!important;width:calc(50% - 4px);padding:8px;display:grid;grid-template-columns:56px 1fr;grid-template-rows:auto auto auto;column-gap:8px;text-align:left;align-items:center}
+.portrait .pcard .av{width:56px;height:56px;margin:0;grid-row:1/4}
+.portrait .pname{min-height:0;justify-content:flex-start;font-size:14px}
+.portrait .pside{justify-content:flex-start}
+.portrait .pnum{font-size:24px;margin:0}
+.portrait .think{grid-column:1/3;height:auto;font-size:12px;display:none}
+.portrait .pcard.turn .think{display:block}
+.portrait .pdesc{grid-column:1/3;max-height:none;font-size:11px;margin-top:4px}
+.portrait #waitpill{position:relative;left:auto;bottom:auto;transform:none;order:4;flex-basis:100%;white-space:normal;text-align:center}
+.portrait #endov{position:fixed}
+.portrait #endbox{width:min(92vw,520px)}
+.portrait #stage>#chat{height:60vh;min-height:320px}
+.portrait #stage>#bottom{flex-wrap:wrap;height:auto;padding:8px 10px;gap:8px}
+.portrait #bottom .t{font-size:18px}
+.portrait #bottom .h{flex-basis:100%;margin-left:0;white-space:normal}

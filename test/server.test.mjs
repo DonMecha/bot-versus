@@ -103,3 +103,22 @@ test('only page files and game views are served', async () => {
     assert.equal((await fetch(base + '/%2e%2e/server.mjs')).status, 404);
   } finally { server.close(); }
 });
+
+test('through a share link: the key is required and bot commands are refused', async () => {
+  const { server, call, dataDir } = await start();
+  try {
+    const key = fs.readFileSync(path.join(dataDir, 'key'), 'utf8');
+    const fwd = { 'cf-connecting-ip': '203.0.113.5', 'x-forwarded-for': '203.0.113.5' };
+    assert.equal((await call('GET', '/api/state', undefined, fwd)).status, 401);
+    assert.equal((await call('GET', '/api/state?key=wrong', undefined, fwd)).status, 401);
+    const st = await call('GET', '/api/state', undefined, { ...fwd, 'x-bv-key': key });
+    assert.equal(st.status, 200);
+    assert.ok(!JSON.stringify(st.body).includes(key), 'the key must not leak in the state');
+    assert.equal((await call('POST', '/api/human/move', { move: 'b3' }, { ...fwd, 'x-bv-key': key, origin: 'https://example.trycloudflare.com' })).status, 200);
+    assert.equal((await call('POST', '/api/bot/say', { text: 'x' }, { ...fwd, 'x-bv-key': key })).status, 403);
+    assert.equal((await call('GET', '/api/bot/wait?timeout=1', undefined, { ...fwd, 'x-bv-key': key })).status, 403);
+    // Local requests (the bot, the bot's own browser) need no key.
+    assert.equal((await call('POST', '/api/bot/say', { text: 'local ok' })).status, 200);
+    assert.equal(fs.statSync(path.join(dataDir, 'key')).mode & 0o077, 0);
+  } finally { server.close(); }
+});

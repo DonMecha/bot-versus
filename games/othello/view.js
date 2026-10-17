@@ -19,9 +19,8 @@ export function mount(el, { onMove }) {
 
   function build(n) {
     size = n; el.innerHTML = ''; cells = [];
-    el.style.gridTemplateColumns = `repeat(${n},1fr)`;
-    el.style.gridTemplateRows = `repeat(${n},1fr)`;
-    el.style.setProperty('--disc', Math.round((480 / n) * .84) + 'px');
+    el.style.gridTemplateColumns = `repeat(${n},minmax(0,1fr))`;
+    el.style.gridTemplateRows = `repeat(${n},minmax(0,1fr))`;
     for (let i = 0; i < n * n; i++) {
       const c = document.createElement('button');
       c.className = 'cell'; c.type = 'button';

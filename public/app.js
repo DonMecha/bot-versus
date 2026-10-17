@@ -1,6 +1,12 @@
 const $ = id => document.getElementById(id);
 const stage = $('stage');
-function fit() { const k = Math.min(innerWidth / 1280, innerHeight / 720); stage.style.transform = `translate(-50%,-50%) scale(${k})`; }
+function fit() {
+  const portrait = innerWidth < 900 || innerWidth < innerHeight;
+  document.body.classList.toggle('portrait', portrait);
+  if (portrait) { stage.style.transform = ''; return; }
+  const k = Math.min(innerWidth / 1280, innerHeight / 720);
+  stage.style.transform = `translate(-50%,-50%) scale(${k})`;
+}
 addEventListener('resize', fit); fit();
 
 const HUMAN_SVG = '<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#1d2b44"/><circle cx="50" cy="38" r="18" fill="#9fb4d8"/><path d="M18 92 Q50 52 82 92 Z" fill="#9fb4d8"/></svg>';
@@ -8,15 +14,20 @@ const HUMAN_SVG = '<svg viewBox="0 0 100 100"><rect width="100" height="100" fil
 let view = null, viewGame = null, faceSVG = null, sideDisc = null, summary = null;
 let pub = null, chatShown = 0;
 
+// Share links carry ?key=...; send it with every request (the local page has none and needs none).
+const KEY = (() => { const q = new URLSearchParams(location.search).get('key'); try { if (q) sessionStorage.setItem('bv-key', q); return q || sessionStorage.getItem('bv-key') || ''; } catch { return q || ''; } })();
+const H = KEY ? { 'x-bv-key': KEY } : {};
+const withKey = u => (KEY ? u + (u.includes('?') ? '&' : '?') + 'key=' + encodeURIComponent(KEY) : u);
+
 async function post(p, body) {
-  const r = await fetch(p, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body || {}) });
+  const r = await fetch(p, { method: 'POST', headers: { 'content-type': 'application/json', ...H }, body: JSON.stringify(body || {}) });
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(j.error || r.status);
   return j;
 }
 
 function botAvatar() {
-  return pub.profile.avatar ? Object.assign(document.createElement('img'), { src: pub.profile.avatar, alt: '' }) : null;
+  return pub.profile.avatar ? Object.assign(document.createElement('img'), { src: withKey(pub.profile.avatar), alt: '' }) : null;
 }
 function setAvatar(el, who) {
   const key = who === 'bot' ? (pub.profile.avatar || 'face') : 'human';
@@ -119,7 +130,7 @@ $('av-bot').addEventListener('click', () => $('avfile').click());
 $('avfile').addEventListener('change', async () => {
   const f = $('avfile').files[0];
   if (!f) return;
-  const r = await fetch('/api/bot/avatar', { method: 'PUT', body: f });
+  const r = await fetch('/api/avatar', { method: 'PUT', headers: H, body: f });
   if (!r.ok) flash((await r.json().catch(() => ({}))).error || 'アイコンを設定できません');
   $('avfile').value = '';
 });
@@ -136,7 +147,8 @@ async function loop() {
   let since = -1;
   for (;;) {
     try {
-      const r = await fetch(`/api/state?since=${since}&wait=25`, { cache: 'no-store' });
+      const r = await fetch(`/api/state?since=${since}&wait=25`, { cache: 'no-store', headers: H });
+      if (r.status === 401) { $('botpill').className = 'off'; $('botpill').textContent = 'リンクの合言葉が違います'; await new Promise(res => setTimeout(res, 5000)); continue; }
       pub = await r.json();
       since = pub.seq;
       await ensureView();
