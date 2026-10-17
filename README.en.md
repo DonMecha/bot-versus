@@ -23,6 +23,11 @@ Open the computer from the conversation and take control to play.
 
 The bot's instructions are in [BOT.md](BOT.md).
 
+## Troubleshooting
+
+- **The page says "Botが待機していません" (the bot is not waiting)**: tell the bot "continue" in your conversation. It goes back to waiting.
+- **The bot's computer screen says it cannot connect**: in Grok Bot settings → Computer, run "Update the bot's computer", restart the app, then start the computer again. The update removes apps and packages installed on the bot's computer (files and sign-ins stay). Afterwards ask the bot to start the server again.
+
 ## Run it on your own machine
 
 Requires Node.js 18 or newer. No dependencies.

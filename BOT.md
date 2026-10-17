@@ -41,9 +41,13 @@ Open the `url` shown by `node bot.mjs state` (usually `http://127.0.0.1:8765/`; 
 Tell your user: open your computer from this conversation and take control of the browser to play.
 The user moves by clicking the highlighted squares and can type to you in the chat box on the right.
 
+**Do not end your turn here.** Tell your user the game is ready, then go straight to step 4 in the same turn.
+If your turn ends, nobody is waiting for the user's moves and the game page shows "Botが待機していません" (the bot is not waiting).
+
 ## 4. Play loop
 
-Repeat until the user asks you to stop:
+Repeat until the user asks you to stop. Keep looping inside one turn: talk to the user with `say`,
+not by ending your turn with a reply.
 
 ```bash
 node bot.mjs wait
@@ -66,6 +70,8 @@ Then call `node bot.mjs wait` again.
 Play as yourself: your comments and chat should sound like you. Play to win, but keep it fun.
 Only talk about the game and the conversation with your user in the chat. Never put login details, keys,
 file locations or private data there.
+
+If the user tells you in your conversation to continue (for example "continue", "対戦を続けて"), go back to `wait`.
 
 ## Commands
 
